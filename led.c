@@ -1,6 +1,9 @@
 /*
- * led: A light version of the ED editior created by Ken Thompson, 
+ *
+ *
+ *      Led: A light version of the **ed** editior created by Ken Thompson, 
  *	one of the key elements of Unix Systems. 
+ *
  *	"The most user-hostile editor ever created"
  *	- Peter H. Salus
  *	
@@ -8,40 +11,6 @@
  *	All rights reserved.
  *
  *
-+++++++++++++++ Makefile +++++++++++++++
-
-all: 		led
-
-led: 		led.c
-		$(CC) led.c -o led -ledit
-
-install: 	led
-		sudo cp led /usr/local/bin
-
-clean:		
-		rm -f led
-
-++++++++++ available commands ++++++++++
-
- ________________________________________________________
-| w <file_name> | select a target file                   |
-|---------------|----------------------------------------|
-| ,p            | print a file                           |
-|---------------|----------------------------------------|
-| ,np           | print a file with numbered lines       |
-|---------------|----------------------------------------|
-| x,yp          | print a file from line x to y          |
-|---------------|----------------------------------------|
-| x,ynp         | print a numbered file from line x to y |
-|---------------|----------------------------------------|
-| <number>      | select a line                          |
-|---------------|----------------------------------------|
-| p             | print the corresponding line           |
-|---------------|----------------------------------------|
-| a             | append text at the corresponding line  |
-|---------------|----------------------------------------|
-|_q_____________|_quit___________________________________| 
-	
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -101,7 +70,7 @@ int num_rows(file_t file) {
 	return line;
 }
 
-
+// This function create a file if the file pointer failed one
 void file_write(file_t *file){
 
 	FILE *fptr  = fopen(file->file_name, "r");
@@ -124,6 +93,7 @@ void file_write(file_t *file){
 
 }
 
+// This function prints a range of lines either numbered or not
 boolean file_print_range(file_t file, boolean num_flag, int from, int to) {
 
 	int c;
@@ -161,6 +131,7 @@ boolean file_print_range(file_t file, boolean num_flag, int from, int to) {
 
 }
 
+// This function appends a number of lines at a selected point
 boolean file_append_line(file_t *file, char *text){
 
 	FILE *fin;
@@ -232,11 +203,70 @@ boolean file_append_line(file_t *file, char *text){
 	return True;
 }
 
-// TO DO ...
-int file_delete_range(){
+// delete a range of lines
+boolean file_delete_range(file_t *file, int from, int to) {
 
-	return 1;
+    FILE *fin;
+    int line = 1; // contatore righe
+    int c;
+
+    fin = fopen(file->file_name, "r");
+    if (!fin) {
+        perror("?\n");
+        return False;
+    }
+
+    if (get_file_size(file->file_name) > 0) {
+
+        char tmpname[] = "/tmp/tmpfileXXXXXX";
+        int fd = mkstemp(tmpname);
+        if (fd == -1) {
+            printf("?\n");
+            fclose(fin);
+            return False;
+        }
+
+        FILE *fout = fdopen(fd, "w+");
+        if (!fout) {
+            printf("?\n");
+            close(fd);
+            fclose(fin);
+            return False;
+        }
+
+        // Copia carattere per carattere, saltando il range
+        while ((c = fgetc(fin)) != EOF) {
+            if (line < from || line > to) {
+                fputc(c, fout);
+            }
+            if (c == '\n') {
+                line++;
+            }
+        }
+
+        fclose(fout);
+        fclose(fin);
+
+        if (remove(file->file_name) != 0) {
+            printf("?\n");
+            remove(tmpname);
+            return False;
+        }
+
+        if (rename(tmpname, file->file_name) != 0) {
+            printf("?\n");
+            remove(tmpname);
+            return False;
+        }
+
+    } else {
+        // file vuoto, non c'è nulla da cancellare
+        fclose(fin);
+    }
+
+    return True;
 }
+
 
 int main(int argc,char **argv){
 	
@@ -346,6 +376,10 @@ int main(int argc,char **argv){
 			
 					file_print_range(new_file, True, op1, op2);
 
+				} else if (strcmp(suffix, "d") == False) {
+
+					file_delete_range(&new_file, op1, op2);
+				
 				} else {
 					printf("?\n");  // unknown suffix
 				}
