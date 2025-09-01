@@ -30,5 +30,5 @@ This is a short list of implemented commands:
 
 # Licence
 
-MIT Licence — do whatever you want with it, but don’t blame me if you lose your precious files.
+MIT Licence : do whatever you want with this piece of software, but don’t blame me if you lose your precious files.
 
