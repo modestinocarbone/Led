@@ -203,11 +203,11 @@ boolean file_append_line(file_t *file, char *text){
 	return True;
 }
 
-// delete a range of lines
+// This function deletes a range of lines
 boolean file_delete_range(file_t *file, int from, int to) {
 
     FILE *fin;
-    int line = 1; // contatore righe
+    int line = 1; // row counter
     int c;
 
     fin = fopen(file->file_name, "r");
@@ -234,7 +234,6 @@ boolean file_delete_range(file_t *file, int from, int to) {
             return False;
         }
 
-        // Copia carattere per carattere, saltando il range
         while ((c = fgetc(fin)) != EOF) {
             if (line < from || line > to) {
                 fputc(c, fout);
@@ -260,7 +259,6 @@ boolean file_delete_range(file_t *file, int from, int to) {
         }
 
     } else {
-        // file vuoto, non c'è nulla da cancellare
         fclose(fin);
     }
 
