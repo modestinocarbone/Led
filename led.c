@@ -1,7 +1,7 @@
 /*
  *
  *
- *      Led: A light version of the **ed** editior created by Ken Thompson, 
+ *  Led: A light version of the **ed** editior created by Ken Thompson, 
  *	one of the key elements of Unix Systems. 
  *
  *	"The most user-hostile editor ever created"
